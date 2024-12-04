@@ -16,7 +16,9 @@ cover:
         travelling_time_down: 34
         close_switch_entity_id: switch.rf_myroom_cover_down
         open_switch_entity_id: switch.rf_myroom_cover_up
-        send_stop_at_ends: False #optional
+        send_stop_at_ends: True # optional
+        send_stop_close_switch_entity_id: switch.rf_myroom_cover_up # optional
+        send_stop_open_switch_entity_id: switch.rf_myroom_cover_down # optional
         aliases: #optional
           - my_room_cover_time_based
 ```
