@@ -1,6 +1,6 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 
-# Cover Time Based Component Synced version
+# Cover Time Based Component Synced version with stop
 
 Cover Time Based Component for your [Home-Assistant](http://www.home-assistant.io) based on [davidramosweb's Cover Time Based Component](https://github.com/davidramosweb/home-assistant-custom-components-cover-time-based) and [nagyrobi's Cover RF Time based](https://github.com/nagyrobi/home-assistant-custom-components-cover-rf-time-based/),
 modified to sync state of cover with the state of switches.
@@ -28,7 +28,9 @@ cover:
         travelling_time_down: 34
         close_switch_entity_id: switch.rf_myroom_cover_down
         open_switch_entity_id: switch.rf_myroom_cover_up
-        send_stop_at_ends: False #optional
+        send_stop_at_ends: True # optional
+    		send_stop_close_switch_entity_id: switch.rf_myroom_cover_up # optional
+    		send_stop_open_switch_entity_id: switch.rf_myroom_cover_down # optional
         aliases: #optional
           - my_room_cover_time_based
 ```
