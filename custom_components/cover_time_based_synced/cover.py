@@ -4,6 +4,7 @@ import logging
 import voluptuous as vol
 
 from datetime import timedelta
+import asyncio
 
 from homeassistant.core import callback
 from homeassistant.helpers import entity_platform
@@ -388,7 +389,6 @@ class CoverTimeBased(CoverEntity, RestoreEntity):
           self._target_position = position
           position = self.current_cover_position
 
-
         if self.tc.is_traveling():
           self.tc.set_position(position)
           self.tc.start_travel(self._target_position)
@@ -405,7 +405,6 @@ class CoverTimeBased(CoverEntity, RestoreEntity):
         """Do auto stop if necessary."""
         current_position = self.tc.current_position()
         if self.position_reached() and not self._processing_known_position:
-            self.tc.stop()
             if (current_position > 0) and (current_position < 100):
                 _LOGGER.debug(self._name + ': ' + 'auto_stop_if_necessary :: current_position between 1 and 99 :: calling stop command')
                 await self._async_handle_command(SERVICE_STOP_COVER)
@@ -413,6 +412,7 @@ class CoverTimeBased(CoverEntity, RestoreEntity):
                 if self._send_stop_at_ends:
                     _LOGGER.debug(self._name + ': ' + 'auto_stop_if_necessary :: send_stop_at_ends :: calling stop command')
                     await self._async_handle_command(SERVICE_STOP_COVER)
+            self.tc.stop()
                     
     async def _send_stop_command(self, stop_switch_entity_id):
         """Send stop command if stop switch is configured."""
@@ -438,16 +438,17 @@ class CoverTimeBased(CoverEntity, RestoreEntity):
             await self.hass.services.async_call("homeassistant", "turn_off", {"entity_id": self._close_switch_entity_id}, False)
             await self.hass.services.async_call("homeassistant", "turn_on", {"entity_id": self._open_switch_entity_id}, False)
 
-        elif command == "stop_cover":
+        elif command == "stop_cover":  
             cmd = "STOP"
             self._state = True
             await self.hass.services.async_call("homeassistant", "turn_off", {"entity_id": self._open_switch_entity_id}, False)
             await self.hass.services.async_call("homeassistant", "turn_off", {"entity_id": self._close_switch_entity_id}, False)
             
             if self.tc.travel_direction == TravelStatus.DIRECTION_UP:
-                await self._send_stop_command(self._send_stop_close_switch_entity_id)
-            elif self.tc.travel_direction == TravelStatus.DIRECTION_DOWN:
                 await self._send_stop_command(self._send_stop_open_switch_entity_id)
+                
+            elif self.tc.travel_direction == TravelStatus.DIRECTION_DOWN:
+                await self._send_stop_command(self._send_stop_close_switch_entity_id)
                 
         _LOGGER.debug(f"{self._name}: _async_handle_command :: {cmd}")
         
